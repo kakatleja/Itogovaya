@@ -180,7 +180,7 @@ string sqrtLongArithmetic(int m, int n) {
     // Выводим ответ
     string result; 
     for (size_t i = 0; i < otvet.size(); ++i) { 
-        if (i == ceil(chislo.size() / 2)) result += '.'; // Точка после первой цифры 
+        if (i == ceil(chislo.size() / 2)) result += '.'; // Точка после числа имеющего значение общего количество цифр в изначальном числе, деленного на 2, с окгруглением в большую
         result += to_string(otvet[i]); 
     } 
  
