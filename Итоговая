@@ -1,0 +1,211 @@
+#include <iostream> 
+#include <vector> 
+#include <string> 
+#include <algorithm> 
+#include <math.h> 
+ 
+using namespace std; 
+
+// Сложение векторов
+vector<int> sloj(const vector<int> &num1, const vector<int> &num2) { 
+    int len1 = num1.size(), len2 = num2.size(); 
+    int max_len = max(len1, len2); 
+    int carry = 0; 
+    vector<int> result; 
+     
+    for (int i = 0; i < max_len || carry; ++i) { 
+        int digit1 = i < len1 ? num1[len1 - 1 - i] : 0; 
+        int digit2 = i < len2 ? num2[len2 - 1 - i] : 0; 
+        int sum = digit1 + digit2 + carry; 
+        carry = sum / 10; 
+        result.push_back(sum % 10); 
+    } 
+ 
+    reverse(result.begin(), result.end()); 
+    return result; 
+} 
+
+// Умножение векторов
+vector<int> umnoj(const vector<int> &num1, const vector<int> &num2) { 
+    int len1 = num1.size(), len2 = num2.size(); 
+    vector<int> result(len1 + len2, 0); 
+ 
+    for (int i = len1 - 1; i >= 0; --i) { 
+        for (int j = len2 - 1; j >= 0; --j) { 
+            int mul = num1[i] * num2[j]; 
+            int sum = mul + result[i + j + 1]; 
+            result[i + j + 1] = sum % 10; 
+            result[i + j] += sum / 10; 
+        } 
+    } 
+ 
+    // Убираем ведущие нули 
+    while (result.size() > 1 && result[0] == 0) { 
+        result.erase(result.begin()); 
+    } 
+ 
+    return result; 
+} 
+
+// Сравнение векторов
+int compare_vectors(const vector<int>& num1, const vector<int>& num2) { 
+    if (num1.size() > num2.size()) return 1; 
+    if (num1.size() < num2.size()) return -1; 
+    for (size_t i = 0; i < num1.size(); ++i) { 
+        if (num1[i] > num2[i]) return 1; 
+        if (num1[i] < num2[i]) return -1; 
+    } 
+    return 0; 
+} 
+
+// Вычитание векторов
+vector<int> vich(const vector<int>& num1, const vector<int>& num2) {
+    int size1 = num1.size();
+    int size2 = num2.size();
+    int maxSize = max(size1, size2);
+    vector<int> result(maxSize, 0);
+
+    int borrow = 0;
+    for (int i = 0; i < maxSize; ++i) {
+        int digit1 = (i < size1) ? num1[size1 - 1 - i] : 0;
+        int digit2 = (i < size2) ? num2[size2 - 1 - i] : 0;
+
+        int diff = digit1 - digit2 - borrow;
+        
+        if (diff < 0) {
+            diff += 10;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+
+        result[maxSize - 1 - i] = diff;
+    }
+
+    // Удаление ведущих нулей
+    while (result.size() > 1 && result[0] == 0) {
+        result.erase(result.begin());
+    }
+
+    return result;
+}
+ 
+// Основная функция
+string sqrtLongArithmetic(int m, int n) { 
+    
+    // Создаем главные вектора
+    vector<int> chislo; 
+    vector<int> otvet; 
+    
+    // Заполняем вектор по одной цифре
+    int temp = m; 
+    while (temp) { 
+        
+        chislo.insert(chislo.begin(), temp % 10); 
+        temp /= 10; 
+        
+    } 
+     
+    // Проверяем вектор 
+    if (chislo.size() % 2 != 0) chislo.insert(chislo.begin(), 0); 
+ 
+    //Создаем первую пару 
+    int pervayaPara = chislo[0] * 10 + chislo[1]; 
+    
+    //Находим первую цифру 
+    int pervayaCifra = 0; 
+    while (pervayaCifra * pervayaCifra <= pervayaPara) { 
+    ++pervayaCifra; 
+    } 
+    --pervayaCifra; 
+     
+    //Добавляем в ответ 
+    otvet.push_back(pervayaCifra); 
+    
+    // Создаем остаток с первой цифрой
+    vector<int> ostatok = vich({pervayaPara}, {pervayaCifra * pervayaCifra});
+    
+    // Проверяем остаток
+    if (ostatok[0] == 0)  ostatok.erase(ostatok.begin());
+    
+    // Работаем с целой частью
+    for (size_t i = 2; i < chislo.size(); i += 2) { 
+        
+        ostatok.push_back(chislo[i]); 
+        if (i + 1 < chislo.size()) ostatok.push_back(chislo[i + 1]); 
+ 
+        vector<int> tempOtvet = otvet; 
+        tempOtvet.push_back(0);  // Сдвиг для умножения на 20 
+ 
+        int digit = 9; 
+        vector<int> prov; // Вектор для сравнения с остатком
+
+        // Подбираем следующую цифру в остаток
+        while (digit >= 0) { 
+            prov = umnoj(sloj(umnoj(tempOtvet, {2}), {digit}), {digit});
+            if (compare_vectors(ostatok, prov) >= 0) break; 
+            --digit; 
+        } 
+
+        // Добавляем цифру в ответ и изменяем остаток
+        otvet.push_back(digit); 
+        ostatok = vich(ostatok, prov); 
+        
+    }
+ 
+    // Добавляем дополнительные разряды для дробной части 
+    for (int i = 0; i < n; ++i) { 
+        ostatok.push_back(0); 
+        ostatok.push_back(0); 
+ 
+        vector<int> tempOtvet = otvet; 
+        tempOtvet.push_back(0); 
+ 
+        int digit = 9; 
+        vector<int> prov; // Вектор для сравнения с остатком
+
+        // Подбираем следующую цифру в остаток
+        while (digit >= 0) { 
+            prov = umnoj(sloj(umnoj(tempOtvet, {2}), {digit}), {digit}); 
+            if (compare_vectors(ostatok, prov) >= 0) break; 
+            digit--;
+        } 
+
+        // Добавляем цифру в ответ и изменяем остаток
+        otvet.push_back(digit); 
+        ostatok = vich(ostatok, prov);
+        
+    } 
+    
+    // Выводим ответ
+    string result; 
+    for (size_t i = 0; i < otvet.size(); ++i) { 
+        if (i == ceil(chislo.size() / 2)) result += '.'; // Точка после первой цифры 
+        result += std::to_string(otvet[i]); 
+    } 
+ 
+    return result; 
+     
+} 
+ 
+int main() { 
+
+    setlocale(LC_ALL, "Russian");
+
+    int m, n; 
+    cout << "Введите натуральное число m: "; 
+    cin >> m; 
+
+    cout << "Введите количество знаков n (n >= 50): "; 
+    cin >> n; 
+ 
+    if (m < 0) { 
+        cerr << "Ошибка: квадратный корень из отрицательного числа невозможен." << std::endl; 
+        return 1; 
+    } 
+ 
+    string result = sqrtLongArithmetic(m, n); 
+    cout << "Квадратный корень из " << m << " с точностью до " << n << " знаков: " << result << std::endl; 
+ 
+    return 0; 
+}
