@@ -181,7 +181,7 @@ string sqrtLongArithmetic(int m, int n) {
     string result; 
     for (size_t i = 0; i < otvet.size(); ++i) { 
         if (i == ceil(chislo.size() / 2)) result += '.'; // Точка после первой цифры 
-        result += std::to_string(otvet[i]); 
+        result += to_string(otvet[i]); 
     } 
  
     return result; 
@@ -196,16 +196,27 @@ int main() {
     cout << "Введите натуральное число m: "; 
     cin >> m; 
 
+    if (m < 0) { 
+        cerr << "Ошибка: квадратный корень из отрицательного числа невозможен." << endl; 
+        return 1; 
+    } 
+
     cout << "Введите количество знаков n (n >= 50): "; 
     cin >> n; 
  
-    if (m < 0) { 
-        cerr << "Ошибка: квадратный корень из отрицательного числа невозможен." << std::endl; 
+    if (n < 50) { 
+        cerr << "Ошибка: количество знаков не меньше 50." << endl; 
         return 1; 
     } 
  
     string result = sqrtLongArithmetic(m, n); 
-    cout << "Квадратный корень из " << m << " с точностью до " << n << " знаков: " << result << std::endl; 
+
+    if (m == 0) {
+
+        result == "0";
+
+    }
+    cout << "Квадратный корень из " << m << " с точностью до " << n << " знаков: " << result << endl; 
  
     return 0; 
 }
